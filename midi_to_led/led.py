@@ -1,7 +1,6 @@
 from colr import color
 from time import sleep
 
-
 class TermLed:
     
     def __init__(self, led_count):
