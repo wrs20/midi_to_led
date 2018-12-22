@@ -1,5 +1,5 @@
 from colr import color
-
+from time import sleep
 
 
 
@@ -15,7 +15,13 @@ class TermLed:
             def __call__(self, *args):
                 self.colour = args
             def __repr__(self):
-                return color(u"\u2588", fore=self.colour[0:3:], style='bright')
+                b = self.colour[3] / 255
+                c = (
+                    int(self.colour[0] * b),
+                    int(self.colour[1] * b),
+                    int(self.colour[2] * b)
+                )
+                return color(u"\u2588", fore=c, style='bright')
 
         self.led_count = led_count
         self.ledlist = [_led() for lx in range(led_count)]
@@ -25,30 +31,24 @@ class TermLed:
         self.refresh()
 
     def refresh(self):
-        s = ''.join([str(lx) for lx in self.ledlist])
-        print("----")
-        print(s, sep='', end='\r', flush=True) 
+        s = '\r' + ''.join([str(lx) for lx in self.ledlist])
+        print(s, sep='', end='    ', flush=True) 
 
 if __name__ == '__main__':
 
     tl = TermLed(5)
-    tl.set(0, 255, 0, 0, 255)
-    tl.set(0, 0, 255, 0, 255)
-    tl.set(0, 0, 0, 255, 255)
-    tl.set(0, 255, 128, 0, 255)
-    tl.set(0, 255, 0, 128, 255)
+
+
+    b = 0
 
     while True:
-        pass
+        sleep(0.05)
+        tl.set(0, 255, 0, 0, b)
+        tl.set(1, 0, 255, 0, b)
+        tl.set(2, 0, 0, 255, b)
+        tl.set(3, 255, 128, 0, b)
+        tl.set(4, 255, 0, 128, b)       
+        b += 10
+        b %= 255
 
-    quit()
-    while True:
-        print(
-            color(u"\u2588", fore=(0, 0, 0), style='bright'), 
-            color(u"\u2588", fore=(255, 0, 0), style='bright'), 
-            color(u"\u2588", fore=(0, 255, 0), style='bright'), 
-            color(u"\u2588", fore=(0, 0, 255), style='bright'), 
-            sep='', 
-            end='\r', 
-            flush=True
-        )
+
