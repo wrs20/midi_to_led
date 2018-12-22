@@ -2,9 +2,6 @@ from colr import color
 from time import sleep
 
 
-
-
-
 class TermLed:
     
     def __init__(self, led_count):
@@ -34,6 +31,9 @@ class TermLed:
         s = '\r' + ''.join([str(lx) for lx in self.ledlist])
         print(s, sep='', end='    ', flush=True) 
 
+
+
+
 if __name__ == '__main__':
 
     tl = TermLed(5)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     b = 0
 
     while True:
-        sleep(0.05)
+        sleep(0.01)
         tl.set(0, 255, 0, 0, b)
         tl.set(1, 0, 255, 0, b)
         tl.set(2, 0, 0, 255, b)
