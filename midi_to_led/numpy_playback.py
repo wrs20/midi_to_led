@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     
     l0 = Led(nl)
-    p0 = NumpyPlayback(l0, 10, data)
+    p0 = NumpyPlayback(l0, 60, data)
     arate = p0()
     print("\n", arate)
 

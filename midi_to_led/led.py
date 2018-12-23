@@ -25,12 +25,14 @@ class _Led:
         self.led_count = ledCount
 
     def set(self, led, r, g, b, brightness):
-        self.ledlist[led] = [0xE0 | brightness, b, g, r]
+        bt = int((brightness / 255) * 31)
+        self.ledlist[led] = [0xE0 | bt, b, g, r]
         self.refresh()
 
     def setAll(self, r, g, b, brightness):
+        bt = int((brightness / 255) * 31)
         for i in range(len(self.ledlist)):
-            self.ledlist[i] = [0xE0 | brightness, b, g, r]
+            self.ledlist[i] = [0xE0 | bt, b, g, r]
         self.refresh()
 
     def refresh(self):
