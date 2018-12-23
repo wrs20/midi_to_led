@@ -43,15 +43,19 @@ if __name__ == '__main__':
         np.linspace(0, 255, nf),
         dtype=UINT8
     )
-    print(gradient)
-    quit()
+    
+    data[:nf:, : , 0] = 255
+    data[nf:2*nf:, : , 1] = 255
+    data[2*nf:3*nf:, : , 2] = 255
 
-    for fx in range(nf):
-        data[fx, :, :] = 
+    for lx in range(nl):
+        data[:nf:, lx, 3] = gradient
+        data[nf:2*nf:, lx, 3] = gradient
+        data[2*nf:3*nf:, lx, 3] = gradient
 
     
     l0 = Led(nl)
-    p0 = NumpyPlayback(l0, 120, data)
+    p0 = NumpyPlayback(l0, 10, data)
     arate = p0()
     print("\n", arate)
 
