@@ -5,6 +5,7 @@ import led
 from math import ceil
 import numpy as np
 from ctypes import c_uint8 as UINT8
+from numpy_playback import NumpyPlayback
 
 class MidiNote:
     def __init__(self, channel, note, velocity, start_time, end_time=None):
@@ -133,7 +134,18 @@ class RenderNotes:
             e = self._time_to_frame(note.end_time)
             l = self.map(note.note)
             v = self._scale_velocity(note.velocity)
+            b = self._get_brightness(s, e, v)
+            data = np.zeros((e - s, 4), dtype=UINT8)
+            data[:, 0] = l[1][0]
+            data[:, 1] = l[1][1]
+            data[:, 2] = l[1][2]
+            data[:, 3] = b
+            self._combine(s, e, l[0], data)
     
+    def _combine(self, start, end, led, data):
+        o = self.data[start:end:, led, :].view()
+        np.bitwise_or(o, data, out=o)
+
     def _scale_velocity(self, v):
         v = int((v/self.midi.velocity_max) * 255)
         v = max(v, 0)
@@ -146,6 +158,8 @@ class RenderNotes:
         et = self._frame_to_time(nf)
         for fx in range(nf):
             b = self.vel_func(st, et, v, self._frame_to_time(fx))
+            b = max(0, b)
+            b = min(255, b)
             ff[fx] = b
         ff[-1] = 0
         return ff
@@ -168,8 +182,8 @@ if __name__ == '__main__':
     ld = led.Led(5)
     mm = MapMidiNotes(mf, ld)
     rn = RenderNotes(mf, mm, linear_decay)
-
-
+    pb = NumpyPlayback(ld, rn.rate, rn.data)
+    pb()
 
 
 
