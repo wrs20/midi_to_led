@@ -1,6 +1,6 @@
 from time import sleep
-
 import time
+
 
 class _Led:
     spi = None
@@ -22,6 +22,7 @@ class _Led:
         # sets all leds to OFF
         for i in range(ledCount):
             self.ledlist.append(self.allledsoff)
+        self.led_count = ledCount
 
     def set(self, led, r, g, b, brightness):
         self.ledlist[led] = [0xE0 | brightness, b, g, r]
@@ -79,11 +80,31 @@ class TermLed:
 
 
 try:
+    # assuming spidev is only importable on an rpi with LEDs
     import spidev
     Led = _Led
+    
+    # turn off leds on ctrl+c
+    import signal
+    import sys    
+    def _TURN_OFF_ALL_LEDS(sig=None, frame=None):
+        lx = Led(5)
+        lx.setAll(0,0,0,0)
+
+        # bodge to make this function usable with atexit
+        if sig is not None:
+            sys.exit(0)
+    
+    signal.signal(signal.SIGINT, _TURN_OFF_ALL_LEDS)
+
+    # turn off all leds on python exit
+    import atexit
+    atexit.register(_TURN_OFF_ALL_LEDS)
+
 except Exception as e:
-    print("Cannot import spidev, using terminal.")
+    print("Cannot use real LEDs, using terminal.")
     Led = TermLed
+
 
 if __name__ == '__main__':
 

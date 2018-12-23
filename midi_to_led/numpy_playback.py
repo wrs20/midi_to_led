@@ -24,7 +24,7 @@ class NumpyPlayback:
             next_time = time() + self.period
             for ledx in range(num_leds):
                 d = self.data[framex, ledx, :]
-                ledsetfunc(ledx, d[0], d[1], d[2], d[3])
+                ledsetfunc(ledx, int(d[0]), int(d[1]), int(d[2]), int(d[3]))
 
             while time() < next_time:
                 pass
@@ -36,14 +36,14 @@ if __name__ == '__main__':
     
     
     nl = 5
-    nf = 1200
+    nf = 120
     data = np.zeros((nf, nl, 4), dtype=UINT8)
 
     for fx in range(nf):
         data[fx, :, :] = np.random.randint(low=0, high=255, size=(nl,4))
 
     
-    l0 = TermLed(nl)
+    l0 = Led(nl)
     p0 = NumpyPlayback(l0, 120, data)
     arate = p0()
     print("\n", arate)
