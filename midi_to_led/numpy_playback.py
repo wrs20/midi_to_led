@@ -13,6 +13,7 @@ class NumpyPlayback:
         self.period = 1.0/rate
         assert data.shape[1] == ledset.led_count
 
+
     def __call__(self):
         num_frames = self.data.shape[0]
         num_leds = self.data.shape[1]
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     
     
     nl = 5
-    nf = 60
+    nf = 1200
     data = np.zeros((nf, nl, 4), dtype=UINT8)
 
     for fx in range(nf):
@@ -43,7 +44,7 @@ if __name__ == '__main__':
 
     
     l0 = TermLed(nl)
-    p0 = NumpyPlayback(l0, 10, data)
+    p0 = NumpyPlayback(l0, 120, data)
     arate = p0()
     print("\n", arate)
 
