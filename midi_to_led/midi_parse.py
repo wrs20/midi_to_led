@@ -183,7 +183,8 @@ if __name__ == '__main__':
     mm = MapMidiNotes(mf, ld)
     rn = RenderNotes(mf, mm, linear_decay)
     pb = NumpyPlayback(ld, rn.rate, rn.data)
-    pb()
+    rate = pb()
+    print(rn.rate, rate, "{: 2.1f}%".format(100.* (rate/rn.rate)))
 
 
 
