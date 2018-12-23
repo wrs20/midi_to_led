@@ -3,7 +3,7 @@ from led import *
 import numpy as np
 import sys
 from ctypes import c_uint8 as UINT8
-from time import time
+from time import time, sleep
 
 class NumpyPlayback:
     def __init__(self, ledset, rate, data):
@@ -56,6 +56,7 @@ if __name__ == '__main__':
     
     l0 = Led(nl)
     p0 = NumpyPlayback(l0, 60, data)
+    sleep(4)
     arate = p0()
     print("\n", arate)
 
