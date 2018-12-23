@@ -37,10 +37,17 @@ if __name__ == '__main__':
     
     nl = 5
     nf = 120
-    data = np.zeros((nf, nl, 4), dtype=UINT8)
+    data = np.zeros((nf*3, nl, 4), dtype=UINT8)
+    
+    gradient = np.array(
+        np.linspace(0, 255, nf),
+        dtype=UINT8
+    )
+    print(gradient)
+    quit()
 
     for fx in range(nf):
-        data[fx, :, :] = np.random.randint(low=0, high=255, size=(nl,4))
+        data[fx, :, :] = 
 
     
     l0 = Led(nl)
