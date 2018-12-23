@@ -2,6 +2,9 @@
 import mido
 from pitch import pitch
 import led
+from math import ceil
+import numpy as np
+from ctypes import c_uint8 as UINT8
 
 class MidiNote:
     def __init__(self, channel, note, velocity, start_time, end_time=None):
@@ -27,6 +30,7 @@ class MidiFile:
         
         pitch_max = 0.0
         pitch_min = 999999.0
+        velocity_max = 0
         
         channels = set()
         for msgx in self.midi:
@@ -36,11 +40,14 @@ class MidiFile:
                 pitch_min = min(pitch_min, p)
                 if not msgx.channel in channels:
                     channels = channels.union({msgx.channel})
+                
+                velocity_max = max(velocity_max, msgx.velocity)
         
         self.pitch_max = pitch_max
         self.pitch_min = pitch_min
         self.length = self.midi.length
         self.channels = channels
+        self.velocity_max = velocity_max
 
         note_channels = {}
         
@@ -106,16 +113,66 @@ class MapMidiNotes:
         self.note_to_ledcolour = tuple(note_to_ledcolour)
 
     def __call__(self, note):
-        return self.note_to_ledspec[note]
+        return self.note_to_ledcolour[note]
+
+
+class RenderNotes:
+    def __init__(self, midi_file, midi_map, vel_func, rate=30):
+        self.rate = rate
+        self.period = 1.0 / rate
+        self.midi = midi_file
+        self.map = midi_map
+        self.led_count = midi_map.ledset.led_count
+        self.vel_func = vel_func
+
+        self.num_frames = int(ceil(self.midi.length / self.period))
+        self.data = np.zeros((self.num_frames, self.led_count, 4), dtype=UINT8)
+
+        for note in self.midi.notes:
+            s = self._time_to_frame(note.start_time)
+            e = self._time_to_frame(note.end_time)
+            l = self.map(note.note)
+            v = self._scale_velocity(note.velocity)
+    
+    def _scale_velocity(self, v):
+        v = int((v/self.midi.velocity_max) * 255)
+        v = max(v, 0)
+        return min(v, 255)
+
+    def _get_brightness(self, sf, ef, v):
+        nf = ef - sf
+        ff = np.zeros(nf, dtype=UINT8)
+        st = 0.0
+        et = self._frame_to_time(nf)
+        for fx in range(nf):
+            b = self.vel_func(st, et, v, self._frame_to_time(fx))
+            ff[fx] = b
+        ff[-1] = 0
+        return ff
+
+    def _time_to_frame(self, t):
+        b = int(t / self.period)
+        b = max(0, b)
+        return min(b, self.num_frames - 1)
+
+    def _frame_to_time(self, f): return self.period * f
+
+    
+def linear_decay(s, e, v, t):
+    return (-1.0 * v / (e-s)) * t + v
+
 
 if __name__ == '__main__':
     import sys
     mf = MidiFile(sys.argv[1])
-    ld = led.TermLed(5)
+    ld = led.Led(5)
     mm = MapMidiNotes(mf, ld)
-    print(mm.note_to_ledcolour)
-    print(mf.length)
-    print(mf.channels)
+    rn = RenderNotes(mf, mm, linear_decay)
+
+
+
+
+
 
 
 
