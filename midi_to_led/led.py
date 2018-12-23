@@ -1,10 +1,53 @@
-from colr import color
 from time import sleep
 
+import time
+
+class _Led:
+    spi = None
+    ledstart = [0x00, 0x00, 0x00, 0x00]
+    ledstop = [0xff, 0xff, 0xff, 0xff]
+    ledlist = []
+    allledsoff = [0xe0, 0x00, 0x00, 0x00]
+
+    brightnessOff = [0xe0]
+    brightnessDim = [0xe1]
+    brightnessFull = [0xff]
+
+    def __init__(self, ledCount):
+
+        import spidev
+        self.spi = spidev.SpiDev()
+        self.spi.open(1, 0)
+        self.spi.max_speed_hz = 1000000
+        # sets all leds to OFF
+        for i in range(ledCount):
+            self.ledlist.append(self.allledsoff)
+
+    def set(self, led, r, g, b, brightness):
+        self.ledlist[led] = [0xE0 | brightness, b, g, r]
+        self.refresh()
+
+    def setAll(self, r, g, b, brightness):
+        for i in range(len(self.ledlist)):
+            self.ledlist[i] = [0xE0 | brightness, b, g, r]
+        self.refresh()
+
+    def refresh(self):
+        ledsetup = self.ledstart[:]
+        for i in range(len(self.ledlist)):
+            ledsetup += self.ledlist[i]
+        ledsetup += self.ledstop
+        self.spi.xfer(ledsetup)
+
+
 class TermLed:
+    """
+    Represents leds in terminal using coloured blocks.
+    24b colour terminal reccomended.
+    """
     
     def __init__(self, led_count):
-
+        from colr import color
         class _led:
             def __init__(self):
                 self.colour = [0,0,0,0]
@@ -26,27 +69,36 @@ class TermLed:
         self.ledlist[led](r, g, b, brightness)
         self.refresh()
 
+    def setAll(self, r, g, b, brightness):
+        for led in self.ledlist:
+            led(r, g, b, brightness)
+
     def refresh(self):
         s = '\r' + ''.join([str(lx) for lx in self.ledlist])
         print(s, sep='', end='    ', flush=True) 
 
 
+try:
+    import spidev
+    Led = _Led
+except Exception as e:
+    print("Cannot import spidev, using terminal.")
+    Led = TermLed
 
 if __name__ == '__main__':
 
-    tl = TermLed(5)
-
+    tl = Led(5)
 
     b = 0
 
     while True:
-        sleep(0.01)
+        sleep(0.1)
         tl.set(0, 255, 0, 0, b)
         tl.set(1, 0, 255, 0, b)
         tl.set(2, 0, 0, 255, b)
         tl.set(3, 255, 128, 0, b)
         tl.set(4, 255, 0, 128, b)       
-        b += 10
+        b += 1
         b %= 255
 
 
