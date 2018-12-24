@@ -16,6 +16,8 @@ class MidiNote:
         self.velocity = velocity
         self.start_time = start_time
         self.end_time = end_time
+        self.midi_start_msg = None
+        self.midi_end_msg = None
 
     def make_end_time(self):
         if self.end_time is None:
@@ -61,7 +63,7 @@ class MidiFile:
         notes = []
 
         curr_time = 0.0
-        for msgx in self.midi:
+        for msgi, msgx in enumerate(self.midi):
             curr_time += msgx.time
             # midi apparently takes velocity = 0 as a note_off
             if msgx.type == 'note_on' and msgx.velocity > 0:
@@ -70,6 +72,7 @@ class MidiFile:
                 new_note = MidiNote(
                     msgx.channel, note, msgx.velocity, curr_time, None
                 )
+                new_note.midi_start_msg = (msgi, msgx)
                 if note in chl.keys(): chl[note].append(new_note)
                 else: chl[note] = [new_note]
 
@@ -80,6 +83,7 @@ class MidiFile:
                 assert note in chl.keys()
                 off_note = chl[note].pop()
                 off_note.end_time = curr_time
+                off_note.midi_end_msg = (msgi, msgx)
                 notes.append(off_note)
         
         # check for left notes
@@ -149,6 +153,13 @@ class RenderNotes:
         for note in self.midi.notes:
             s = self._time_to_frame(note.start_time)
             e = self._time_to_frame(note.end_time)
+            if (s - e) == 0:
+                print('-'*60)
+                print(note.start_time, note.end_time)
+                print(note.midi_start_msg)
+                print(note.midi_end_msg)
+                print('-'*60)
+                continue
             l = self.map(note.note)
             v = self._scale_velocity(note.velocity)
             b = self._get_brightness(s, e, v)
@@ -190,7 +201,12 @@ class RenderNotes:
 
     
 def linear_decay(s, e, v, t):
-    return (-1.0 * v / (e-s)) * t + v
+    return (-1.0 * v / (e-s)) * (t-s) + v
+
+def exp_decay(s, e, v, t):
+    r = e - s
+    x = t - s
+    return v * exp(-2.0*(x/r))
 
 
 if __name__ == '__main__':
@@ -199,7 +215,8 @@ if __name__ == '__main__':
     ld = led.Led(5)
     cm = cyan_to_magenta
     mm = MapMidiNotes(mf, ld, cm)
-    rn = RenderNotes(mf, mm, linear_decay)
+    #rn = RenderNotes(mf, mm, linear_decay)
+    rn = RenderNotes(mf, mm, exp_decay)
     pb = NumpyPlayback(ld, rn.rate, rn.data)
     rate = pb()
     print(rn.rate, rate, "{: 2.1f}%".format(100.* (rate/rn.rate)))
