@@ -172,7 +172,7 @@ class RenderNotes:
     
     def _combine(self, start, end, led, data):
         o = self.data[start:end:, led, :].view()
-        np.bitwise_or(o, data, out=o)
+        np.maximum(o, data, out=o)
 
     def _scale_velocity(self, v):
         v = int((v/self.midi.velocity_max) * 255)
