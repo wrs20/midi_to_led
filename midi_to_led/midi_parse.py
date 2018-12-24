@@ -2,7 +2,7 @@
 import mido
 from pitch import pitch
 import led
-from math import ceil
+from math import ceil, exp, sqrt
 import numpy as np
 from ctypes import c_uint8 as UINT8
 from numpy_playback import NumpyPlayback
@@ -19,7 +19,8 @@ class MidiNote:
 
     def make_end_time(self):
         if self.end_time is None:
-            self.end_time = self.start_time + 0.1
+            print(self.velocity, sqrt(self.velocity))
+            self.end_time = self.start_time + sqrt(self.velocity)
     
     def __repr__(self):
         return '{} {} {} {} {}'.format(
@@ -62,7 +63,8 @@ class MidiFile:
         curr_time = 0.0
         for msgx in self.midi:
             curr_time += msgx.time
-            if msgx.type == 'note_on':
+            # midi apparently takes velocity = 0 as a note_off
+            if msgx.type == 'note_on' and msgx.velocity > 0:
                 chl = note_channels[msgx.channel]
                 note = msgx.note
                 new_note = MidiNote(
@@ -71,19 +73,21 @@ class MidiFile:
                 if note in chl.keys(): chl[note].append(new_note)
                 else: chl[note] = [new_note]
 
-            elif msgx.type == 'note_off':
+            elif msgx.type == 'note_off' or \
+                    (msgx.type == 'note_on' and msgx.velocity == 0):
                 chl = note_channels[msgx.channel]
                 note = msgx.note
                 assert note in chl.keys()
                 off_note = chl[note].pop()
                 off_note.end_time = curr_time
                 notes.append(off_note)
-
-        # give end times to notes that the midi never spec'd end times
-        # for
+        
+        # check for left notes
         for chx in note_channels:
             chl = note_channels[chx]
             for notex in chl.keys():
+                if len(chl[notex]) > 0:
+                    print("Warning: notes left on")
                 for nx in chl[notex]:
                     nx.make_end_time()
                     notes.append(nx)
