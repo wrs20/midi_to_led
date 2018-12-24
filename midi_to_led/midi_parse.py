@@ -6,6 +6,8 @@ from math import ceil
 import numpy as np
 from ctypes import c_uint8 as UINT8
 from numpy_playback import NumpyPlayback
+from colour_map import *
+
 
 class MidiNote:
     def __init__(self, channel, note, velocity, start_time, end_time=None):
@@ -92,11 +94,17 @@ class MapMidiNotes:
     """
     Map midi notes onto leds and colours
     """
-    def __init__(self, midifile, ledset):
+    def __init__(self, midifile, ledset,
+            colour_map=ColourMap(ConstVal(), ConstVal(), ConstVal())):
+
         self.midifile = midifile
         self.ledset = ledset
+        self.colour_map = colour_map
         
         bin_width = (self.midifile.pitch_max - self.midifile.pitch_min) / self.ledset.led_count
+        
+        pmax = self.midifile.pitch_max
+        pmin = self.midifile.pitch_min
 
         note_to_ledcolour = []
         for nx in range(128):
@@ -107,9 +115,14 @@ class MapMidiNotes:
                 ld = int((freq - self.midifile.pitch_min) / bin_width)
                 ld = max(0, ld)
                 ld = min(ld, self.ledset.led_count - 1)
-
+                
                 # colour map goes here, start with white
-                note_to_ledcolour.append((ld, (255, 255, 255)))
+                note_to_ledcolour.append(
+                    (
+                        ld, 
+                        self.colour_map(pmin, pmax, freq)
+                    )
+                )
 
         self.note_to_ledcolour = tuple(note_to_ledcolour)
 
@@ -118,7 +131,7 @@ class MapMidiNotes:
 
 
 class RenderNotes:
-    def __init__(self, midi_file, midi_map, vel_func, rate=30):
+    def __init__(self, midi_file, midi_map, vel_func, rate=60):
         self.rate = rate
         self.period = 1.0 / rate
         self.midi = midi_file
@@ -180,6 +193,7 @@ if __name__ == '__main__':
     import sys
     mf = MidiFile(sys.argv[1])
     ld = led.Led(5)
+
     mm = MapMidiNotes(mf, ld)
     rn = RenderNotes(mf, mm, linear_decay)
     pb = NumpyPlayback(ld, rn.rate, rn.data)
