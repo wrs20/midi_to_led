@@ -206,7 +206,7 @@ def linear_decay(s, e, v, t):
 def exp_decay(s, e, v, t):
     r = e - s
     x = t - s
-    return v * exp(-4.0*(x/r))
+    return v * exp(-5.0*(x/r))
 
 
 if __name__ == '__main__':
