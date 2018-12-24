@@ -26,7 +26,16 @@ class ConstVal:
         return self.i
 
 
+def _linear(a, fa, b, fb, x):
+    r = b - a
+    g = (fb - fa) / r
+    return g * x + fa
 
 
-
+def cyan_to_magenta(a, b, x):
+    return (
+        int(255 * _linear(0, 0, 1, 1, x)),
+        int(255 * _linear(0, 1, 1, 0, x)),
+        255
+    )
 

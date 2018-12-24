@@ -193,8 +193,8 @@ if __name__ == '__main__':
     import sys
     mf = MidiFile(sys.argv[1])
     ld = led.Led(5)
-
-    mm = MapMidiNotes(mf, ld)
+    cm = cyan_to_magenta
+    mm = MapMidiNotes(mf, ld, cm)
     rn = RenderNotes(mf, mm, linear_decay)
     pb = NumpyPlayback(ld, rn.rate, rn.data)
     rate = pb()
