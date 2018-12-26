@@ -1,15 +1,32 @@
 import mido
 from led import Led
-
+import sys
 
 
 class RealtimeLed:
-    def __init__(self, ledset):
+    def __init__(self, ledset, max_brightness=10):
         self.ledset = ledset
         self._notes_on = {}
+        self._leds_on = set()
+        self._mb = max_brightness
+
 
     def _ledrefresh(self):
         print(self._notes_on)
+        
+        should_be_on = set()
+
+        for nx in self._notes_on.keys():
+            l = nx % 5  # simple map onto leds
+            self.ledset.set(l, 255, 0, 0, self._mb)
+
+            should_be_on = should_be_on.union(set((l,)))
+            self._leds_on = self._leds_on.union(set((l,)))
+
+        turn_off = self._leds_on.difference(should_be_on)
+        for l in turn_off:
+            self.ledset.set(l, 0, 0, 0, 0)
+
     
     def __call__(self, msg):
         print(msg)
@@ -50,7 +67,10 @@ if __name__ == '__main__':
     
     # make led rendering objects
     ledset = Led(5)
-    rtled = RealtimeLed(ledset)
+    if len(sys.argv) > 1: bt = int(sys.argv[1])
+    else: bt = 10
+
+    rtled = RealtimeLed(ledset, bt)
 
 
 
