@@ -5,9 +5,10 @@ import numpy as np
 from ctypes import c_uint8 as UINT8
 from colour_map import *
 
-class RedLedMap:
-    def __init__(self, ledset):
+class _BaseMap:
+    def __init__(self, ledset, max_brightness):
         self.ledset = ledset
+        self.mb = max_brightness
 
     def __call__(self, note, velocity):
         l = note % self.ledset.led_count
@@ -17,15 +18,31 @@ class RedLedMap:
         return b
 
 
-class ThreeBumpLedMap:
-    def __init__(self, ledset):
-        self.ledset = ledset
+class RedLedMap(_BaseMap):
+    pass
 
+
+class ThreeBumpLedMap(_BaseMap):
     def __call__(self, note, velocity):
-        l = note % self.ledset.led_count
-        c = np.array((255, 0, 0, 9), dtype=UINT8)
+        lc = self.ledset.led_count
         b = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
-        b[l, :] = c
+        l = note % lc
+
+        c = (0, 255, 0)
+        
+        for ox, bx in zip((-1, 0, 1),
+                (
+                    int(10),
+                    int(self.mb), 
+                    int(10)
+                )
+            ):
+
+            l2 = l + ox
+            if l2 >= 0 and l2 < lc:
+                b[l2, 0:3:] = c
+                b[l2,3] = bx
+
         return b
 
 
@@ -93,9 +110,12 @@ if __name__ == '__main__':
 
     
     # make led rendering objects
+    if len(sys.argv) > 1: mb = int(sys.argv[1])
+    else: mb = 10
+
     ledset = Led(5)
-    # rtmap = RedLedMap(ledset)
-    rtmap = ThreeBumpLedMap(ledset)
+    # rtmap = RedLedMap(ledset, mb)
+    rtmap = ThreeBumpLedMap(ledset, mb)
     rtled = RealtimeLed(ledset, rtmap)
 
 
