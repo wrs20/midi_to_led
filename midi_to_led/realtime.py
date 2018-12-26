@@ -1,31 +1,30 @@
 import mido
 from led import Led
 import sys
-
+import numpy as np
+from ctypes import c_uint8 as UINT8
 
 class RealtimeLed:
     def __init__(self, ledset, max_brightness=10):
         self.ledset = ledset
         self._notes_on = {}
-        self._leds_on = set()
         self._mb = max_brightness
-
+        self.leds_on = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
 
     def _ledrefresh(self):
         print(self._notes_on)
         
         should_be_on = set()
+        self.leds_on.fill(0)
 
         for nx in self._notes_on.keys():
             l = nx % 5  # simple map onto leds
-            self.ledset.set(l, 255, 0, 0, self._mb)
-
-            should_be_on = should_be_on.union(set((l,)))
-            self._leds_on = self._leds_on.union(set((l,)))
-
-        turn_off = self._leds_on.difference(should_be_on)
-        for l in turn_off:
-            self.ledset.set(l, 0, 0, 0, 0)
+            c = np.array((255, 0, 0, self._mb), dtype=UINT8)
+            np.maximum(c, self.leds_on[l, :], self.leds_on[l, :])
+        
+        for lx in range(self.ledset.led_count):
+            t = self.leds_on[lx, :]
+            self.ledset.set(lx, int(t[0]), int(t[1]), int(t[2]), int(t[3]))
 
     
     def __call__(self, msg):
@@ -34,7 +33,8 @@ class RealtimeLed:
             self._notes_on[msg.note] = msg.velocity
         
         elif msg.type == 'note_off':
-            del self._notes_on[msg.note]
+            if msg.note in self._notes_on.keys():
+                del self._notes_on[msg.note]
 
         self._ledrefresh()
 
