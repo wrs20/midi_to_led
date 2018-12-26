@@ -139,13 +139,15 @@ class MapMidiNotes:
 
 
 class RenderNotes:
-    def __init__(self, midi_file, midi_map, vel_func, rate=60):
+    def __init__(self, midi_file, midi_map, vel_func,
+            rate=60, max_brightness=255):
         self.rate = rate
         self.period = 1.0 / rate
         self.midi = midi_file
         self.map = midi_map
         self.led_count = midi_map.ledset.led_count
         self.vel_func = vel_func
+        self.max_bt = max_brightness
 
         self.num_frames = int(ceil(self.midi.length / self.period))
         self.data = np.zeros((self.num_frames, self.led_count, 4), dtype=UINT8)
@@ -175,9 +177,9 @@ class RenderNotes:
         np.maximum(o, data, out=o)
 
     def _scale_velocity(self, v):
-        v = int((v/self.midi.velocity_max) * 255)
+        v = int((v/self.midi.velocity_max) * self.max_bt)
         v = max(v, 0)
-        return min(v, 255)
+        return min(v, self.max_bt)
 
     def _get_brightness(self, sf, ef, v):
         nf = ef - sf
@@ -206,18 +208,21 @@ def linear_decay(s, e, v, t):
 def exp_decay(s, e, v, t):
     r = e - s
     x = t - s
-    return v * exp(-4.0*(x/r))
+    return v * exp(-3.0*(x/r))
 
 
 if __name__ == '__main__':
     import sys
     mf = MidiFile(sys.argv[1])
     ld = led.Led(5)
-    cm = cyan_to_magenta
+    # cm = cyan_to_magenta
+    # cm = red_to_green
+    cm = warm_white
     mm = MapMidiNotes(mf, ld, cm)
     #rn = RenderNotes(mf, mm, linear_decay)
-    rn = RenderNotes(mf, mm, exp_decay)
+    rn = RenderNotes(mf, mm, exp_decay, max_brightness=41)
     pb = NumpyPlayback(ld, rn.rate, rn.data)
+    # print(rn.data[0:100:, :, :])
     rate = pb()
     print(rn.rate, rate, "{: 2.1f}%".format(100.* (rate/rn.rate)))
 
