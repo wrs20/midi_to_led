@@ -17,6 +17,17 @@ class RedLedMap:
         return b
 
 
+class ThreeBumpLedMap:
+    def __init__(self, ledset):
+        self.ledset = ledset
+
+    def __call__(self, note, velocity):
+        l = note % self.ledset.led_count
+        c = np.array((255, 0, 0, 9), dtype=UINT8)
+        b = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
+        b[l, :] = c
+        return b
+
 
 
 
@@ -83,8 +94,8 @@ if __name__ == '__main__':
     
     # make led rendering objects
     ledset = Led(5)
-    rtmap = RedLedMap(ledset)
-    #rtmap = RealtimeLedMap(ledset)
+    # rtmap = RedLedMap(ledset)
+    rtmap = ThreeBumpLedMap(ledset)
     rtled = RealtimeLed(ledset, rtmap)
 
 
