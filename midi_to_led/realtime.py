@@ -9,6 +9,10 @@ class _BaseMap:
     def __init__(self, ledset, max_brightness):
         self.ledset = ledset
         self.mb = max_brightness
+        self.init_colour_map()
+
+    def init_colour_map(self):
+        pass
 
     def __call__(self, note, velocity):
         l = note % self.ledset.led_count
@@ -23,12 +27,15 @@ class RedLedMap(_BaseMap):
 
 
 class ThreeBumpLedMap(_BaseMap):
+
     def __call__(self, note, velocity):
         lc = self.ledset.led_count
         b = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
         l = note % lc
-
-        c = (0, 255, 0)
+        
+        p = note % 12
+        c = cyan_to_magenta(0.0, 11.0, float(p)/11.0)
+        print(p, c)
         
         for ox, bx in zip((-1, 0, 1),
                 (
@@ -57,7 +64,6 @@ class RealtimeLed:
         self.leds_on = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
 
     def _ledrefresh(self):
-        print(self._notes_on)
         
         should_be_on = set()
         self.leds_on.fill(0)
@@ -72,7 +78,6 @@ class RealtimeLed:
 
     
     def __call__(self, msg):
-        print(msg)
         if msg.type == 'note_on':
             self._notes_on[msg.note] = msg.velocity
         

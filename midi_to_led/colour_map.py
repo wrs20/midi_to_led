@@ -27,16 +27,16 @@ class ConstVal:
 
 
 def _linear(a, fa, b, fb, x):
-    r = b - a
-    g = (fb - fa) / r
-    return g * x + fa
+    r = float(b - a)
+    g = float(fb - fa) / r
+    return g * float(x) + fa
 
 
 def cyan_to_magenta(a, b, x):
     return (
         int(255 * _linear(0, 0, 1, 1, x)),
-        int(255 * _linear(0, 1, 1, 0, x)),
-        255
+        int(150 * _linear(0, 1, 1, 0, x)),
+        100
     )
 
 def red_to_green(a, b, x):
