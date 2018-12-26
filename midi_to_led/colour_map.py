@@ -39,3 +39,13 @@ def cyan_to_magenta(a, b, x):
         255
     )
 
+def red_to_green(a, b, x):
+    return (
+        int(255 * _linear(0, 0, 1, 1, x)),
+        int(255 * _linear(0, 1, 1, 0, x)),
+        0
+    )
+
+def warm_white(a, b, x):
+    return (255, 140, 60)
+
