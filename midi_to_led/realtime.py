@@ -31,11 +31,17 @@ class ThreeBumpLedMap(_BaseMap):
     def __call__(self, note, velocity):
         lc = self.ledset.led_count
         b = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
-        l = note % lc
+        
+        l = note % 12
+        l = (l / 11.) * 4
+        l = int(l)
+        l %= 5
+        l = 4 - l
         
         p = note % 12
-        c = cyan_to_magenta(0.0, 11.0, float(p)/11.0)
-        print(p, c)
+        # c = cyan_to_magenta(0.0, 11.0, float(p)/11.0)
+        c = red_to_green(0.0, 11.0, float(p)/11.0)
+        print(l, p, c)
         
         for ox, bx in zip((-1, 0, 1),
                 (
