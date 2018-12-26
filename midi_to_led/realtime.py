@@ -3,12 +3,29 @@ from led import Led
 import sys
 import numpy as np
 from ctypes import c_uint8 as UINT8
+from colour_map import *
+
+class RedLedMap:
+    def __init__(self, ledset):
+        self.ledset = ledset
+
+    def __call__(self, note, velocity):
+        l = note % self.ledset.led_count
+        c = np.array((255, 0, 0, 9), dtype=UINT8)
+        b = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
+        b[l, :] = c
+        return b
+
+
+
+
+
 
 class RealtimeLed:
-    def __init__(self, ledset, max_brightness=10):
+    def __init__(self, ledset, rtledmap):
         self.ledset = ledset
         self._notes_on = {}
-        self._mb = max_brightness
+        self.m = rtledmap
         self.leds_on = np.zeros((self.ledset.led_count, 4), dtype=UINT8)
 
     def _ledrefresh(self):
@@ -18,9 +35,8 @@ class RealtimeLed:
         self.leds_on.fill(0)
 
         for nx in self._notes_on.keys():
-            l = nx % 5  # simple map onto leds
-            c = np.array((255, 0, 0, self._mb), dtype=UINT8)
-            np.maximum(c, self.leds_on[l, :], self.leds_on[l, :])
+            c = self.m(nx, self._notes_on[nx])
+            np.maximum(c, self.leds_on[:], self.leds_on[:])
         
         for lx in range(self.ledset.led_count):
             t = self.leds_on[lx, :]
@@ -67,10 +83,9 @@ if __name__ == '__main__':
     
     # make led rendering objects
     ledset = Led(5)
-    if len(sys.argv) > 1: bt = int(sys.argv[1])
-    else: bt = 10
-
-    rtled = RealtimeLed(ledset, bt)
+    rtmap = RedLedMap(ledset)
+    #rtmap = RealtimeLedMap(ledset)
+    rtled = RealtimeLed(ledset, rtmap)
 
 
 
