@@ -32,12 +32,39 @@ def check_output_wrapper(cmd):
 pi ALL=NOPASSWD: /sbin/halt, /sbin/reboot, /sbin/poweroff
 """
 
+curr_keys = (
+    'rr0',
+    'gg0',
+    'bb0',
+    'br0'
+)
+
+curr_vals = (
+    '128',
+    '128',
+    '128',
+    '50'
+)
+
+
+curr_state = dict()
+for kx, vx in zip(curr_keys, curr_vals):
+    curr_state[kx] = vx
+
+print(curr_state)
+
 @app.route("/", methods=['GET', 'POST'])
 def index():
     print(request.method)
     stdout = ''
     if request.method == 'POST':
         print(request)
+        print(request.form)
+        
+        for kx in curr_keys:
+            curr_state[kx] = request.form[kx]
+        
+        print(curr_state)
 
         #if request.form.get('clear_print_queue') == 'Clear Print Queue':
         #    # pass
@@ -52,13 +79,13 @@ def index():
         #    print("shutdown pi")
         #    stdout = check_output_wrapper(('sudo', 'poweroff'),)
 
-        return render_template("index.html",uptime=get_uptime(), stdout=stdout)
+        return render_template("index.html", **curr_state)
 
     elif request.method == 'GET':
         # return render_template("index.html")
         print("No Post Back Call")
 
-    return render_template("index.html")
+    return render_template("index.html", **curr_state)
 
 
 if __name__ == '__main__':

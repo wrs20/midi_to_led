@@ -58,16 +58,16 @@
                 <fieldset>
                     <legend>Led 0</legend>
                     <label>Red</label>
-                    <input type="range" name="rr0" min="0" max="255">
+                    <input type="range" name="rr0" min="0" max="255", value="{{rr0}}", step="1">
                     <label>Green</label>
-                    <input type="range" name="gg0" min="0" max="255">
+                    <input type="range" name="gg0" min="0" max="255", value="{{gg0}}", step="1">
                     <label>Blue</label>
-                    <input type="range" name="bb0" min="0" max="255">
+                    <input type="range" name="bb0" min="0" max="255", value="{{bb0}}", step="1">
                     <label>Brightness</label>
-                    <input type="range" name="br0" min="0" max="255">                   
+                    <input type="range" name="br0" min="0" max="255", value="{{br0}}", step="1">
                     </p>
-                </fieldset>
-                <input class="buttong" type="update" value="Update LEDs" name="update_leds"/> 
+                    </fieldset>
+                <input class="buttong" type="submit" value="Update LEDs" name="update_leds"/> 
             </form>
         </div>
     </body>
