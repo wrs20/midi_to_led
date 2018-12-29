@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html>
+    <script language="javascript">
+        setInterval(function() {
+            var myImageElement = document.getElementById('cap');
+            myImageElement.src = 'cap.jpg?rand=' + Math.random();
+        }, 1000);
+    </script>
+
     <head>
         <style>
             .buttonr {
@@ -125,7 +132,7 @@
             </form>
         </div>
         <div class="ib">
-            <img src="cap.jpg" alt="" width="800">
+            <img src="cap.jpg" alt="" width="900" id=cap>
         </div>
     </body>
 </html>

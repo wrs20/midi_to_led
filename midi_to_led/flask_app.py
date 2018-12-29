@@ -7,7 +7,7 @@ import io
 app = Flask(__name__, static_url_path='/')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-from threading import Thread
+from threading import Thread, Lock
 
 
 curr_keys = (
@@ -19,15 +19,12 @@ curr_keys = (
 )
 
 
-
-
-
 curr_vals = (
-    '0', '0', '0', '0',
-    '0', '0', '0', '0',
-    '0', '0', '0', '0',
-    '0', '0', '0', '0',
-    '0', '0', '0', '0',
+    '0', '0', '0', '10',
+    '0', '0', '0', '10',
+    '0', '0', '0', '10',
+    '0', '0', '0', '10',
+    '0', '0', '0', '10',
 )
 
 
@@ -63,22 +60,30 @@ def get_cap():
     cv2.imwrite('/dev/shm/cap.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 90])
 
 
+
+cap_bytes = None
+cap_lock = Lock()
+
 def get_cap_bytes():
     _, image = camera.read()
     _, jpg_bytes = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 90])
-    return io.BytesIO(jpg_bytes)
+    global cap_bytes
+    
+    cap_lock.acquire()
+    cap_bytes = io.BytesIO(jpg_bytes)
+    cap_lock.release()
+    
 
-
-
+get_cap_bytes()
 
 
 def continuous_cap():
     while(1):
-        get_cap()
+        get_cap_bytes()
 
 
-#gthread = Thread(target=continuous_cap)
-#gthread.start()
+gthread = Thread(target=continuous_cap)
+gthread.start()
 
 @app.after_request
 def add_header(r):
@@ -95,8 +100,11 @@ def add_header(r):
 
 @app.route('/cap.jpg')
 def send_cap():
-    print("in send_cap")
-    return send_file(get_cap_bytes(), attachment_filename='cap.jpg', mimetype='image/jpg')
+    #get_cap_bytes()
+    cap_lock.acquire()
+    r = send_file(cap_bytes, attachment_filename='cap.jpg', mimetype='image/jpg')
+    cap_lock.release()
+    return r
     #return send_from_directory('templates', 'cap.jpg')
 
 
