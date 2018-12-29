@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, send_file
 from led import Led
 import cv2
 from time import sleep
+import io
 
 app = Flask(__name__, static_url_path='/')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+from threading import Thread
 
 
 curr_keys = (
@@ -47,14 +50,35 @@ def update_leds():
 update_leds()
 
 camera = cv2.VideoCapture(0)
+while not camera.isOpened():
+    sleep(1)
+    camera = cv2.VideoCapture(0)
+
 camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 960)
 
 def get_cap():
-    print("get cap")
-    sleep(0.1)
     return_value, image = camera.read()
-    cv2.imwrite('templates/cap.jpg', image)
+    # cv2.imwrite('templates/cap.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    cv2.imwrite('/dev/shm/cap.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+
+
+def get_cap_bytes():
+    _, image = camera.read()
+    _, jpg_bytes = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    return io.BytesIO(jpg_bytes)
+
+
+
+
+
+def continuous_cap():
+    while(1):
+        get_cap()
+
+
+#gthread = Thread(target=continuous_cap)
+#gthread.start()
 
 @app.after_request
 def add_header(r):
@@ -69,14 +93,11 @@ def add_header(r):
     return r
 
 
-
-
-
-
-@app.route('/cap.png')
+@app.route('/cap.jpg')
 def send_cap():
     print("in send_cap")
-    return send_from_directory('templates', 'cap.png')
+    return send_file(get_cap_bytes(), attachment_filename='cap.jpg', mimetype='image/jpg')
+    #return send_from_directory('templates', 'cap.jpg')
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -95,7 +116,7 @@ def index():
                 curr_state[kx] = request.form[kx]
 
         update_leds()
-        get_cap()
+        #get_cap()
 
         return render_template("index.html", **curr_state)
 
@@ -106,6 +127,7 @@ def index():
     return render_template("index.html", **curr_state)
 
 
-if __name__ == '__main__':
-    app.debug = False
-    app.run(host='0.0.0.0', port=8080)
+app.debug = False
+app.run(host='0.0.0.0', port=8080)
+
+
