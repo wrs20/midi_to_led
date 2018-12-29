@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .buttonr {
+                background-color: #ff0000;
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+            .buttono {
+                background-color: #ff5d00;
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+            .buttong {
+                background-color: #4CAF50;
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+
+
+    <body>
+        {{uptime}}
+        <form method="post" action="/">
+                <input class="buttong" type="submit" value="Clear Print Queue" name="clear_print_queue"/>
+                <input class="buttono" type="submit" value="Reboot Pi" name="reboot_pi"/>
+                <input class="buttonr" type="submit" value="Shutdown Pi" name="shutdown_pi"/>
+        </form>
+        {{stdout}}
+    </body>
+</html>

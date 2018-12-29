@@ -45,9 +45,9 @@ class ThreeBumpLedMap(_BaseMap):
         
         for ox, bx in zip((-1, 0, 1),
                 (
-                    int(10),
+                    int(30),
                     int(self.mb), 
-                    int(10)
+                    int(30)
                 )
             ):
 
