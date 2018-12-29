@@ -48,12 +48,17 @@
                 width: 80px;
                 text-align: right;
             }
+
+            .ib {
+                vertical-align: top;
+                display:inline-block;
+            }
         </style>
     </head>
 
 
     <body>
-        <div class="container">
+        <div class="ib">
             <form method="post" action="/">
                 <fieldset>
                     <legend>Led 0</legend>
@@ -118,6 +123,9 @@
                 <input class="buttono" type="submit" value="Reset" name="reset_leds"/> 
                 <input class="buttong" type="submit" value="Update LEDs" name="update_leds"/> 
             </form>
+        </div>
+        <div class="ib">
+            <img src="cap.jpg" alt="" width="800">
         </div>
     </body>
 </html>

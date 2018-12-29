@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from led import Led
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+print(app.static_url_path)
 
 
 curr_keys = (
@@ -46,6 +47,10 @@ def update_leds():
 
 update_leds()
 
+@app.route('/cap.jpg')
+def send_cap():
+    print("in send_cap")
+    return send_from_directory('templates', 'cap.jpg')
 
 
 @app.route("/", methods=['GET', 'POST'])
