@@ -1,11 +1,10 @@
 from flask import Flask, render_template, request, send_from_directory
 from led import Led
-
+import cv2
+from time import sleep
 
 app = Flask(__name__, static_url_path='/')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
-
-print(app.static_url_path)
 
 
 curr_keys = (
@@ -47,10 +46,37 @@ def update_leds():
 
 update_leds()
 
-@app.route('/cap.jpg')
+camera = cv2.VideoCapture(0)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+def get_cap():
+    print("get cap")
+    sleep(0.1)
+    return_value, image = camera.read()
+    cv2.imwrite('templates/cap.jpg', image)
+
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
+
+
+
+
+
+
+@app.route('/cap.png')
 def send_cap():
     print("in send_cap")
-    return send_from_directory('templates', 'cap.jpg')
+    return send_from_directory('templates', 'cap.png')
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -69,6 +95,7 @@ def index():
                 curr_state[kx] = request.form[kx]
 
         update_leds()
+        get_cap()
 
         return render_template("index.html", **curr_state)
 
