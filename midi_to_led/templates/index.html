@@ -38,17 +38,37 @@
                 margin: 4px 2px;
                 cursor: pointer;
             }
+            fieldset {
+                padding:4px;
+                width:280px;
+                line-height:1.0;
+            }
+            label {
+                display: inline-block;
+                width: 80px;
+                text-align: right;
+            }
         </style>
     </head>
 
 
     <body>
-        {{uptime}}
-        <form method="post" action="/">
-                <input class="buttong" type="submit" value="Clear Print Queue" name="clear_print_queue"/>
-                <input class="buttono" type="submit" value="Reboot Pi" name="reboot_pi"/>
-                <input class="buttonr" type="submit" value="Shutdown Pi" name="shutdown_pi"/>
-        </form>
-        {{stdout}}
+        <div class="container">
+            <form method="post" action="/">
+                <fieldset>
+                    <legend>Led 0</legend>
+                    <label>Red</label>
+                    <input type="range" name="rr0" min="0" max="255">
+                    <label>Green</label>
+                    <input type="range" name="gg0" min="0" max="255">
+                    <label>Blue</label>
+                    <input type="range" name="bb0" min="0" max="255">
+                    <label>Brightness</label>
+                    <input type="range" name="br0" min="0" max="255">                   
+                    </p>
+                </fieldset>
+                <input class="buttong" type="update" value="Update LEDs" name="update_leds"/> 
+            </form>
+        </div>
     </body>
 </html>

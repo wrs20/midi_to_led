@@ -38,25 +38,27 @@ def index():
     stdout = ''
     if request.method == 'POST':
         print(request)
-        if request.form.get('clear_print_queue') == 'Clear Print Queue':
-            # pass
-            print("Clear Queue")
-            stdout = 'Error: not implemented.'
-        elif  request.form.get('reboot_pi') == 'Reboot Pi':
-            print("Reboot pi")
-            # assuming that this user can execute 'sudo reboot' without password
-            stdout = check_output_wrapper(('sudo', 'reboot'),)
-        elif  request.form.get('shutdown_pi') == 'Shutdown Pi':
-            # assuming that this user can execute 'sudo poweroff' without password
-            print("shutdown pi")
-            stdout = check_output_wrapper(('sudo', 'poweroff'),)
+
+        #if request.form.get('clear_print_queue') == 'Clear Print Queue':
+        #    # pass
+        #    print("Clear Queue")
+        #    stdout = 'Error: not implemented.'
+        #elif  request.form.get('reboot_pi') == 'Reboot Pi':
+        #    print("Reboot pi")
+        #    # assuming that this user can execute 'sudo reboot' without password
+        #    stdout = check_output_wrapper(('sudo', 'reboot'),)
+        #elif  request.form.get('shutdown_pi') == 'Shutdown Pi':
+        #    # assuming that this user can execute 'sudo poweroff' without password
+        #    print("shutdown pi")
+        #    stdout = check_output_wrapper(('sudo', 'poweroff'),)
 
         return render_template("index.html",uptime=get_uptime(), stdout=stdout)
 
     elif request.method == 'GET':
         # return render_template("index.html")
         print("No Post Back Call")
-    return render_template("index.html", uptime=get_uptime(), stdout=stdout)
+
+    return render_template("index.html")
 
 
 if __name__ == '__main__':
