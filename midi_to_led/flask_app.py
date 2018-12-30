@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, send_from_directory, send_file
 from led import Led
 import cv2
-from time import sleep
+from time import sleep, time
 import io
 
 app = Flask(__name__, static_url_path='/')
@@ -76,10 +76,17 @@ def get_cap_bytes():
 
 get_cap_bytes()
 
+last_cap_rq = time()
 
 def continuous_cap():
+    global last_cap_rq
     while(1):
         get_cap_bytes()
+        if time() - last_cap_rq > 5:
+            reset_state()
+            update_leds()
+            last_cap_rq = time()
+        
 
 
 gthread = Thread(target=continuous_cap)
@@ -102,8 +109,13 @@ def add_header(r):
 def send_cap():
     #get_cap_bytes()
     cap_lock.acquire()
-    r = send_file(cap_bytes, attachment_filename='cap.jpg', mimetype='image/jpg')
+    send_buf = io.BytesIO(cap_bytes.getbuffer())
     cap_lock.release()
+    r = send_file(send_buf, attachment_filename='cap.jpg', mimetype='image/jpg')
+
+    global last_cap_rq
+    last_cap_rq = time()
+
     return r
     #return send_from_directory('templates', 'cap.jpg')
 
