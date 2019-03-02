@@ -111,17 +111,75 @@ except Exception as e:
 if __name__ == '__main__':
 
     tl = Led(5)
+    
+    if len(sys.argv[:]) == 1:
+        b = 0
+        while True:
+            sleep(0.1)
+            tl.set(0, 255, 0, 0, b)
+            tl.set(1, 0, 255, 0, b)
+            tl.set(2, 0, 0, 255, b)
+            tl.set(3, 255, 128, 0, b)
+            tl.set(4, 255, 0, 128, b)       
+            b += 1
+            b %= 255
+    else:
 
-    b = 0
+            off = [0, 0, 0, 0]
+            white = [255, 255, 255, 255]
+            red = [255, 0, 0, 255]
+            orange = [255, 64, 0, 255]
+            yellow = [255, 255, 0, 255]
+            lime = [0, 255, 64, 255]
+            green = [0, 255, 0, 255]
+            mint = [0, 255, 64, 255]
+            cyan = [0, 255, 255, 255]
 
-    while True:
-        sleep(0.1)
-        tl.set(0, 255, 0, 0, b)
-        tl.set(1, 0, 255, 0, b)
-        tl.set(2, 0, 0, 255, b)
-        tl.set(3, 255, 128, 0, b)
-        tl.set(4, 255, 0, 128, b)       
-        b += 1
-        b %= 255
+            blue = [0, 0, 255, 255]
+            purple = [64, 0, 255, 255]
+            magenta = [255, 0, 255, 255]
+            pink = [255, 0, 64, 255]
+
+            colour = [0, 0, 0, 0]
+
+            if len(sys.argv) == 2:
+                if sys.argv[1] == "white":
+                    colour = white
+                elif sys.argv[1] == "red":
+                    colour = red
+                elif sys.argv[1] == "orange":
+                    colour = orange
+                elif sys.argv[1] == "yellow":
+                    colour = yellow
+                elif sys.argv[1] == "lime":
+                    colour = lime
+                elif sys.argv[1] == "green":
+                    colour = green
+                elif sys.argv[1] == "mint":
+                    colour = mint
+                elif sys.argv[1] == "cyan":
+                    colour = cyan
+                elif sys.argv[1] == "blue":
+                    colour = blue
+                elif sys.argv[1] == "purple":
+                    colour = purple
+                elif sys.argv[1] == "magenta":
+                    colour = magenta
+                elif sys.argv[1] == "pink":
+                    colour = pink
+                else:
+                    colour = off
+                    
+            elif len(sys.argv) == 5:
+                for i in range(1, 5):
+                    colour[i - 1] = int(sys.argv[i])
+            else:
+                print("Arg Error")
+                quit()
+            
+            tl.setAll(colour[0], colour[1], colour[2], colour[3])
+            a = input("Press the any key to quit\n")
+
+
 
 
